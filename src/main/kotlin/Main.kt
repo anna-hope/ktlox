@@ -8,7 +8,7 @@ private var hadError = false
 
 fun main(args: Array<String>) {
     if (args.size > 1) {
-       println("Usage: ktlox [script]")
+        println("Usage: ktlox [script]")
     } else if (args.size == 1) {
         runFile(args[0])
     } else {
@@ -29,8 +29,10 @@ private fun runPrompt() {
     while (true) {
         print("> ")
         val line = readln()
-        run(line)
-        hadError = false
+        if (line.isNotEmpty()) {
+            run(line)
+            hadError = false
+        }
     }
 }
 
@@ -38,9 +40,11 @@ private fun run(source: String) {
     val scanner = Scanner(source)
     val tokens = scanner.scanTokens()
 
-    for (token in tokens) {
-        println(token)
-    }
+    val parser = Parser(tokens)
+    val expression = parser.parse()
+
+    if (hadError) return
+    expression?.let { println(AstPrinter().print(it)) }
 }
 
 fun error(line: Int, message: String) {
@@ -50,4 +54,11 @@ fun error(line: Int, message: String) {
 private fun report(line: Int, where: String, message: String) {
     System.err.println("[line: $line] Error$where: $message")
     hadError = true
+}
+
+fun error(token: Token, message: String) {
+    when (token.type) {
+        TokenType.EOF -> report(token.line, " at end", message)
+        else -> report(token.line, " at '${token.lexeme}'", message)
+    }
 }
