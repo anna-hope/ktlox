@@ -8,7 +8,7 @@ class Parser(private val tokens: List<Token>) {
     fun parse(): List<Stmt> {
         val statements = ArrayList<Stmt>()
         while (!isAtEnd()) {
-            statements.add(statement())
+            declaration()?.let { statements.add(it) }
         }
 
         return statements
@@ -16,6 +16,16 @@ class Parser(private val tokens: List<Token>) {
 
     private fun expression(): Expr {
         return equality()
+    }
+
+    private fun declaration(): Stmt? {
+        try {
+            if (match(TokenType.VAR)) return varDeclaration()
+            return statement()
+        } catch (error: ParseError) {
+            synchronize()
+            return null
+        }
     }
 
     private fun statement(): Stmt {
@@ -27,6 +37,19 @@ class Parser(private val tokens: List<Token>) {
         val value = expression()
         consume(TokenType.SEMICOLON, "Expect ';' after value.")
         return Stmt.Print(value)
+    }
+
+    private fun varDeclaration(): Stmt {
+        val name = consume(TokenType.IDENTIFIER, "Expect variable name.")
+
+        val initializer = if (match(TokenType.EQUAL)) {
+            expression()
+        } else {
+            null
+        }
+
+        consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
+        return Stmt.Var(name, initializer)
     }
 
     private fun expressionStatement(): Stmt {
@@ -149,8 +172,9 @@ class Parser(private val tokens: List<Token>) {
             match(TokenType.LEFT_PAREN) -> {
                 val expr = expression()
                 consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
-                return Expr.Grouping(expr)
+                Expr.Grouping(expr)
             }
+            match(TokenType.IDENTIFIER) -> Expr.Variable(previous())
             else -> throw error(peek(), "Expect expression.")
         }
     }

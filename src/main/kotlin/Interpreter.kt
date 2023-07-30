@@ -1,6 +1,7 @@
 package com.craftinginterpreters.lox
 
 class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
+    private val environment = Environment()
 
     fun interpret(statements: List<Stmt>) {
         try {
@@ -32,6 +33,9 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
         }
     }
 
+    override fun visitVariableExpr(expr: Expr.Variable): Any? {
+        return environment.get(expr.name)
+    }
 //    private fun checkNumberOperand(operator: Token, operand: Any?) {
 //        if (operand is Double) return
 //        throw RuntimeError(operator, "Operand must be a number.")
@@ -93,6 +97,16 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
     override fun visitPrintStmt(stmt: Stmt.Print) {
         val value = evaluate(stmt.expression)
         println(stringify(value))
+    }
+
+    override fun visitVarStmt(stmt: Stmt.Var) {
+        val value = if (stmt.initializer != null) {
+            evaluate(stmt.initializer)
+        } else {
+            null
+        }
+
+        environment.define(stmt.name.lexeme, value)
     }
 
     override fun visitBinaryExpr(expr: Expr.Binary): Any? {
