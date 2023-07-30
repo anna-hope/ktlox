@@ -12,12 +12,14 @@ fun generateAst(args: Array<String>) {
             "Binary : val left: Expr, val operator: Token, val right: Expr",
             "Grouping : val expression: Expr", "Literal : val value: Any?",
             "Unary : val operator: Token, val right: Expr",
+            "Variable : val name: Token",
         )
     )
     defineAst(
         outputDir, "Stmt", listOf(
             "Expression : val expression: Expr",
             "Print : val expression: Expr",
+            "Var : val name: Token, val initializer: Expr?",
         )
     )
 }
