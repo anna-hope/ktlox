@@ -4,7 +4,9 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.system.exitProcess
 
-private var hadError = false
+private val interpreter = Interpreter()
+var hadError = false
+var hadRuntimeError = false
 
 fun main(args: Array<String>) {
     if (args.size > 1) {
@@ -22,6 +24,10 @@ private fun runFile(path: String) {
 
     if (hadError) {
         exitProcess(65)
+    }
+
+    if (hadRuntimeError) {
+        exitProcess(70)
     }
 }
 
@@ -44,7 +50,10 @@ private fun run(source: String) {
     val expression = parser.parse()
 
     if (hadError) return
-    expression?.let { println(AstPrinter().print(it)) }
+    if (expression == null) {
+        throw RuntimeException("Got null expression")
+    }
+    interpreter.interpret(expression)
 }
 
 fun error(line: Int, message: String) {
@@ -61,4 +70,9 @@ fun error(token: Token, message: String) {
         TokenType.EOF -> report(token.line, " at end", message)
         else -> report(token.line, " at '${token.lexeme}'", message)
     }
+}
+
+fun runtimeError(error: RuntimeError) {
+    System.err.println("${error.message}\n[line ${error.token.line}]")
+    hadRuntimeError = true
 }
