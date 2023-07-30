@@ -36,7 +36,11 @@ private fun runPrompt() {
         print("> ")
         val line = readln()
         if (line.isNotEmpty()) {
-            run(line)
+            try {
+                run(line)
+            } catch (_: RuntimeException) {
+                // We need this to not crash on ParseError.
+            }
             hadError = false
         }
     }
@@ -47,13 +51,10 @@ private fun run(source: String) {
     val tokens = scanner.scanTokens()
 
     val parser = Parser(tokens)
-    val expression = parser.parse()
+    val statements = parser.parse()
 
     if (hadError) return
-    if (expression == null) {
-        throw RuntimeException("Got null expression")
-    }
-    interpreter.interpret(expression)
+    interpreter.interpret(statements)
 }
 
 fun error(line: Int, message: String) {

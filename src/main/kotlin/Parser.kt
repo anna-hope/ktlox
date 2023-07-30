@@ -5,17 +5,36 @@ class Parser(private val tokens: List<Token>) {
 
     private class ParseError : RuntimeException()
 
-    fun parse(): Expr? {
-        return try {
-            expression()
-        } catch (error: ParseError) {
-            null
+    fun parse(): List<Stmt> {
+        val statements = ArrayList<Stmt>()
+        while (!isAtEnd()) {
+            statements.add(statement())
         }
+
+        return statements
     }
 
     private fun expression(): Expr {
         return equality()
     }
+
+    private fun statement(): Stmt {
+        if (match(TokenType.PRINT)) return printStatement()
+        return expressionStatement()
+    }
+
+    private fun printStatement(): Stmt {
+        val value = expression()
+        consume(TokenType.SEMICOLON, "Expect ';' after value.")
+        return Stmt.Print(value)
+    }
+
+    private fun expressionStatement(): Stmt {
+        val expr = expression()
+        consume(TokenType.SEMICOLON, "Expect ';' after expression.")
+        return Stmt.Expression(expr)
+    }
+
 
     private fun equality(): Expr {
         return leftAssociativeBinaryOperator(
@@ -86,7 +105,8 @@ class Parser(private val tokens: List<Token>) {
 
             when (peek().type) {
                 TokenType.CLASS, TokenType.FUN, TokenType.VAR, TokenType.FOR, TokenType.IF,
-                TokenType.WHILE, TokenType.PRINT, TokenType.RETURN -> return
+                TokenType.WHILE, TokenType.PRINT, TokenType.RETURN,
+                -> return
                 else -> advance()
             }
         }
