@@ -15,7 +15,7 @@ class Parser(private val tokens: List<Token>) {
     }
 
     private fun expression(): Expr {
-        return equality()
+        return assignment()
     }
 
     private fun declaration(): Stmt? {
@@ -58,6 +58,23 @@ class Parser(private val tokens: List<Token>) {
         return Stmt.Expression(expr)
     }
 
+    private fun assignment(): Expr {
+        val expr = equality()
+
+        if (match(TokenType.EQUAL)) {
+            val equals = previous()
+            val value = assignment()
+
+            if (expr is Expr.Variable) {
+                val name = expr.name
+                return Expr.Assign(name, value)
+            }
+
+            error(equals, "Invalid assignment target.")
+        }
+
+        return expr
+    }
 
     private fun equality(): Expr {
         return leftAssociativeBinaryOperator(

@@ -9,6 +9,7 @@ fun generateAst(args: Array<String>) {
     val outputDir = args[0]
     defineAst(
         outputDir, "Expr", listOf(
+            "Assign : val name: Token, val value: Expr",
             "Binary : val left: Expr, val operator: Token, val right: Expr",
             "Grouping : val expression: Expr", "Literal : val value: Any?",
             "Unary : val operator: Token, val right: Expr",
