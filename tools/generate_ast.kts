@@ -18,6 +18,7 @@ fun generateAst(args: Array<String>) {
     )
     defineAst(
         outputDir, "Stmt", listOf(
+            "Block : val statements: List<Stmt>",
             "Expression : val expression: Expr",
             "Print : val expression: Expr",
             "Var : val name: Token, val initializer: Expr?",
