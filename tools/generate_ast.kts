@@ -25,6 +25,7 @@ fun generateAst(args: Array<String>) {
             "If : val condition: Expr, val thenBranch: Stmt, val elseBranch: Stmt?",
             "Print : val expression: Expr",
             "Var : val name: Token, val initializer: Expr?",
+            "While : val condition: Expr, val body: Stmt",
         )
     )
 }
