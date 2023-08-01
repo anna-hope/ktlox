@@ -1,7 +1,23 @@
 package com.craftinginterpreters.lox
 
 class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
-    private var environment = Environment()
+    val globals = Environment()
+    private var environment = globals
+
+    init {
+        globals.define("clock", object : LoxCallable {
+            override val arity: Int = 0
+
+            override fun call(interpreter: Interpreter, arguments: List<Any?>): Any {
+                return System.currentTimeMillis() / 1000.0
+            }
+
+            override fun toString(): String {
+                return "<native fn>"
+            }
+        }
+        )
+    }
 
     fun interpret(statements: List<Stmt>) {
         try {
@@ -208,7 +224,7 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
         }
     }
 
-    override fun visitCallExpr(expr: Expr.Call): Any {
+    override fun visitCallExpr(expr: Expr.Call): Any? {
         val function = evaluate(expr.callee)
         val arguments = ArrayList<Any?>()
 
@@ -225,7 +241,6 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
                 expr.paren, "Expected ${function.arity} arguments but got ${arguments.size}."
             )
         }
-        
 
         return function.call(this, arguments)
     }
