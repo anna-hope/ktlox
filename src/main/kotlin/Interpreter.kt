@@ -208,6 +208,28 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
         }
     }
 
+    override fun visitCallExpr(expr: Expr.Call): Any {
+        val function = evaluate(expr.callee)
+        val arguments = ArrayList<Any?>()
+
+        for (argument in expr.arguments) {
+            arguments.add(evaluate(argument))
+        }
+
+        if (function !is LoxCallable) {
+            throw RuntimeError(expr.paren, "Can only call functions and classes.")
+        }
+
+        if (arguments.size != function.arity) {
+            throw RuntimeError(
+                expr.paren, "Expected ${function.arity} arguments but got ${arguments.size}."
+            )
+        }
+        
+
+        return function.call(this, arguments)
+    }
+
     private fun checkNumberOperands(operator: Token, left: Any?, right: Any?) {
         if (left is Double && right is Double) {
             return
