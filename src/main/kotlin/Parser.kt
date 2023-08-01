@@ -136,8 +136,16 @@ class Parser(private val tokens: List<Token>) {
 
     private fun expressionStatement(): Stmt {
         val expr = expression()
-        consume(TokenType.SEMICOLON, "Expect ';' after expression.")
-        return Stmt.Expression(expr)
+        return if (isAtEnd()) {
+            Stmt.Print(expr)
+        } else {
+            try {
+                consume(TokenType.SEMICOLON, "Expect ';' after expression.")
+                Stmt.Expression(expr)
+            } catch (_: ParseError) {
+                Stmt.Print(expr)
+            }
+        }
     }
 
     private fun function(kind: String): Stmt {
