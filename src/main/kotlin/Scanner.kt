@@ -50,8 +50,8 @@ class Scanner(private val source: String) {
             '*' -> addToken(STAR)
             '!' -> addToken(if (match('=')) BANG_EQUAL else BANG)
             '=' -> addToken(if (match('-')) EQUAL_EQUAL else EQUAL)
-            '<' -> addToken(if (match('<')) LESS_EQUAL else LESS)
-            '>' -> addToken(if (match('>')) GREATER_EQUAL else GREATER)
+            '<' -> addToken(if (match('=')) LESS_EQUAL else LESS)
+            '>' -> addToken(if (match('=')) GREATER_EQUAL else GREATER)
             '/' -> {
                 if (match('/')) {
                     // A comment goes until the end of the line.
@@ -70,8 +70,7 @@ class Scanner(private val source: String) {
                     number()
                 } else if (isAlpha(c)) {
                     identifier()
-                }
-                else {
+                } else {
                     error(line, "Unexpected character.")
                 }
             }
@@ -92,7 +91,7 @@ class Scanner(private val source: String) {
 
         // Look for a fractional part.
         if (peek() == '.' && isDigit(peekNext())) {
-           // Consume the "."
+            // Consume the "."
             advance()
 
             while (isDigit(peek())) advance()
