@@ -130,7 +130,7 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
     }
 
     private fun beginScope() {
-        scopes.push(HashMap<String, Boolean>())
+        scopes.push(HashMap())
     }
 
     private fun endScope() {
