@@ -4,6 +4,8 @@ import java.util.*
 
 class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.Visitor<Unit> {
     private val scopes = Stack<MutableMap<String, Boolean>>()
+    private val varsUsed = Stack<MutableMap<String, Boolean>>()
+    private val nameToToken = HashMap<String, Token>()
     private var currentFunction = FunctionType.NONE
 
     override fun visitBlockStmt(stmt: Stmt.Block) {
@@ -131,10 +133,19 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
 
     private fun beginScope() {
         scopes.push(HashMap())
+        varsUsed.push(HashMap())
     }
 
     private fun endScope() {
         scopes.pop()
+
+        val varsUsedScope = varsUsed.pop()
+        for ((variable, wasUsed) in varsUsedScope) {
+            if (!wasUsed) {
+                val token = nameToToken[variable]!!
+                error(token, "Variable '$variable' was declared but never used.")
+            }
+        }
     }
 
     private fun declare(name: Token) {
@@ -145,6 +156,8 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
         }
 
         scope[name.lexeme] = false
+        varsUsed.peek()[name.lexeme] = false
+        nameToToken[name.lexeme] = name
     }
 
     private fun define(name: Token) {
@@ -155,6 +168,8 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
     private fun resolveLocal(expr: Expr, name: Token) {
         for (i in scopes.size - 1 downTo 0) {
             if (name.lexeme in scopes[i]) {
+                // Mark the variable as used.
+                varsUsed[i][name.lexeme] = true
                 interpreter.resolve(expr, scopes.size - 1 - i)
                 return
             }
