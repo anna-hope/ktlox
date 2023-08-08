@@ -46,6 +46,18 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
         return evaluate(expr.right)
     }
 
+    override fun visitSetExpr(expr: Expr.Set): Any? {
+        val obj = evaluate(expr.obj)
+
+        if (obj !is LoxInstance) {
+            throw RuntimeError(expr.name, "Only instances have fields.")
+        }
+
+        val value = evaluate(expr.value)
+        obj[expr.name] = value
+        return value
+    }
+
     override fun visitUnaryExpr(expr: Expr.Unary): Any? {
         val right = evaluate(expr.right)
         return when (expr.operator.type) {
@@ -278,6 +290,15 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
         }
 
         return function.call(this, arguments)
+    }
+
+    override fun visitGetExpr(expr: Expr.Get): Any? {
+        val obj = evaluate(expr.obj)
+        if (obj is LoxInstance) {
+            return obj[expr.name]
+        }
+
+        throw RuntimeError(expr.name, "Only instances have properties.")
     }
 
     private fun checkNumberOperands(operator: Token, left: Any?, right: Any?) {

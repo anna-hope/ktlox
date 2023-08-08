@@ -12,9 +12,11 @@ fun generateAst(args: Array<String>) {
             "Assign : val name: Token, val value: Expr",
             "Binary : val left: Expr, val operator: Token, val right: Expr",
             "Call : val callee: Expr, val paren: Token, val arguments: List<Expr>",
+            "Get : val obj: Expr, val name: Token",
             "Grouping : val expression: Expr",
             "Literal : val value: Any?",
             "Logical : val left: Expr, val operator: Token, val right: Expr",
+            "Set : val obj: Expr, val name: Token, val value: Expr",
             "Unary : val operator: Token, val right: Expr",
             "Variable : val name: Token",
         )
