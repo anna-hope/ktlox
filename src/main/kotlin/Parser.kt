@@ -20,6 +20,7 @@ class Parser(private val tokens: List<Token>) {
 
     private fun declaration(): Stmt? {
         try {
+            if (match(TokenType.CLASS)) return classDeclaration()
             if (match(TokenType.FUN)) return function("function")
             if (match(TokenType.VAR)) return varDeclaration()
             return statement()
@@ -27,6 +28,19 @@ class Parser(private val tokens: List<Token>) {
             synchronize()
             return null
         }
+    }
+
+    private fun classDeclaration(): Stmt {
+        val name = consume(TokenType.IDENTIFIER, "Expect class name.")
+        consume(TokenType.LEFT_BRACE, "Expect '{' before class body.")
+
+        val methods = ArrayList<Stmt.Function>()
+        while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+            methods.add(function("method") as Stmt.Function)
+        }
+
+        consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.")
+        return Stmt.Class(name, methods)
     }
 
     private fun statement(): Stmt {
