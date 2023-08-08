@@ -15,6 +15,11 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
     override fun visitClassStmt(stmt: Stmt.Class) {
         declare(stmt.name)
         define(stmt.name)
+
+        for (method in stmt.methods) {
+            val declaration = FunctionType.METHOD
+            resolveFunction(method, declaration)
+        }
     }
 
     override fun visitExpressionStmt(stmt: Stmt.Expression) {
@@ -179,4 +184,5 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
 enum class FunctionType {
     NONE,
     FUNCTION,
+    METHOD,
 }

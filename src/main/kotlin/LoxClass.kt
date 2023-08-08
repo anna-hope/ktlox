@@ -1,7 +1,11 @@
 package com.craftinginterpreters.lox
 
-class LoxClass(val name: String) : LoxCallable {
+class LoxClass(val name: String, private val methods: Map<String, LoxFunction>) : LoxCallable {
     override val arity: Int = 0
+
+    fun findMethod(name: String): LoxFunction? {
+        return methods[name]
+    }
 
     override fun toString(): String {
         return name
