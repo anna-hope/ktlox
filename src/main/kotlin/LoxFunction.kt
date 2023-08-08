@@ -7,6 +7,12 @@ class LoxFunction(
     override val arity: Int
         get() = declaration.params.size
 
+    fun bind(instance: LoxInstance): LoxFunction {
+        val environment = Environment(closure)
+        environment.define("this", instance)
+        return LoxFunction(declaration, environment)
+    }
+
     override fun call(interpreter: Interpreter, arguments: List<Any?>): Any? {
         val environment = Environment(closure)
         for (i in 0 until declaration.params.size) {

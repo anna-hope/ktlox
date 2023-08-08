@@ -17,6 +17,7 @@ fun generateAst(args: Array<String>) {
             "Literal : val value: Any?",
             "Logical : val left: Expr, val operator: Token, val right: Expr",
             "Set : val obj: Expr, val name: Token, val value: Expr",
+            "This : val keyword: Token",
             "Unary : val operator: Token, val right: Expr",
             "Variable : val name: Token",
         )
