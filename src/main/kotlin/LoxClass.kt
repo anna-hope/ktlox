@@ -1,6 +1,7 @@
 package com.craftinginterpreters.lox
 
-class LoxClass(val name: String, private val methods: Map<String, LoxFunction>) : LoxCallable {
+class LoxClass(val name: String, val superclass: LoxClass?, private val methods: Map<String, LoxFunction>) :
+    LoxCallable {
     override val arity: Int
         get() {
             val initializer = findMethod("init")
@@ -8,7 +9,14 @@ class LoxClass(val name: String, private val methods: Map<String, LoxFunction>) 
         }
 
     fun findMethod(name: String): LoxFunction? {
-        return methods[name]
+        if (name in methods) {
+            return methods[name]
+        }
+
+        if (superclass != null) {
+            return superclass.findMethod(name)
+        }
+        return null
     }
 
     override fun toString(): String {
